@@ -1,7 +1,6 @@
 const gulp = require("gulp");
 const { src, dest, watch, parallel, series } = require("gulp")
 
-
 //minify images and copy it to dist folder
 const imagemin = require('gulp-imagemin');
 function imgMinify() {
@@ -22,27 +21,29 @@ const htmlmin = require('gulp-htmlmin');
 function copyHtml() {
     return src('src/*.html')
         .pipe(htmlmin({ collapseWhitespace: true, removeComments: true }))
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('dist'))
 }
 
 exports.html = copyHtml
 
 
 //minify js files and copy it to dist folder
-const sourcemaps = require('gulp-sourcemaps');
+const sourcemap = require('gulp-sourcemaps');
 const concat = require('gulp-concat');
 const terser = require('gulp-terser');
-
+const babel = require("gulp-babel")
 function jsMinify() {
-    return src('src/js/**/*.js') //path includeing all js files in all folders
-        .pipe(sourcemaps.init())
+    return src('src/js/**/*.js',{sourcemaps:true}) //path includeing all js files in all folders
+    
         //concate all js files in all.min.js
         .pipe(concat('all.min.js'))
+        .pipe(
+            babel()
+          )
         //use terser to minify js files
         .pipe(terser())
         //create source map file in the same directory
-        .pipe(sourcemaps.write('.'))
-        .pipe(dest('dist/assets/js'));
+        .pipe(dest('dist/assets/js',{sourcemaps:'.'}))
 }
 exports.js = jsMinify
 
@@ -52,12 +53,13 @@ exports.js = jsMinify
 var cleanCss = require('gulp-clean-css');
 function cssMinify() {
     return src("src/css/**/*.css")
+    .pipe(sourcemap.init())
         //concate all css files in style.min.css
         .pipe(concat('style.min.css'))
         //minify file 
         .pipe(cleanCss())
-        .pipe(dest('dist/assets/css'));
-
+        .pipe(sourcemap.write('.'))
+        .pipe(dest('dist/assets/css'))
 }
 exports.css = cssMinify
 // exports.default=series(copyHtml,task1,promiseTask,callbackTask,imgMinify,jsMinify/* ,cssMinify */)
@@ -74,13 +76,27 @@ function sassMinify() {
 }
 
 
-//watch task
-function watchTask() {
-    //"src/css/**/*.css",
-    watch(['src/js/**/*.js', "src/css/**/*.css"], { interval: 1000 }, parallel(jsMinify, sassMinify));
+
+var browserSync = require('browser-sync');
+function serve (cb){
+  browserSync({
+    server: {
+      baseDir: 'dist/'
+    }
+  });
+  cb()
+}
+function reloadSync(cb){
+ browserSync.reload()
+  cb()
 }
 
-exports.default = series(parallel(imgMinify, jsMinify/* , cssMinify */, sassMinify, copyHtml), watchTask)
+//watch task
+function watchTask() {
+    watch('src/*.html',series(copyHtml, reloadSync))
+    watch(['src/js/**/*.js', "src/css/**/*.css","src/sass/**/*.scss"], { interval: 1000 },parallel(jsMinify,sassMinify,reloadSync));
+}
+exports.default = series(parallel(imgMinify, jsMinify/* , cssMinify */, sassMinify, copyHtml), serve,watchTask)
 
 
 

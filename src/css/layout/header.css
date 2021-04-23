@@ -1,0 +1,10 @@
+.header {
+  background-color: rgb(72, 164, 226);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70px;
+  color: aliceblue;
+  font-size: 20px;
+  line-height: 1.4;
+}

@@ -1,10 +1,14 @@
-body{
-    font-size: larger;
+
+/* ---------  GLOBAL STYLES  --------- */
+
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+}
 
 
-    background-color:lightgrey;
 
-
-
-    /* color:yellow */
+body {
+  background-attachment: fixed;
 }
