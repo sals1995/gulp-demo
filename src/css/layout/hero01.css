@@ -13,10 +13,6 @@
   line-height: 1.2;
 }
 
-.content-section1 {
-  margin-top: 180px;
-}
-
 
 @media screen and (max-width: 768px) {
   .hero01 {

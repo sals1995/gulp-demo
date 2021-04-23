@@ -28,7 +28,7 @@ exports.html = copyHtml
 
 
 //minify js files and copy it to dist folder
-const sourcemap = require('gulp-sourcemaps');
+const sourcemaps = require('gulp-sourcemaps');
 const concat = require('gulp-concat');
 const terser = require('gulp-terser');
 const babel = require("gulp-babel")
@@ -53,26 +53,22 @@ exports.js = jsMinify
 var cleanCss = require('gulp-clean-css');
 function cssMinify() {
     return src("src/css/**/*.css")
-    .pipe(sourcemap.init())
         //concate all css files in style.min.css
         .pipe(concat('style.min.css'))
         //minify file 
         .pipe(cleanCss())
-        .pipe(sourcemap.write('.'))
         .pipe(dest('dist/assets/css'))
 }
 exports.css = cssMinify
-// exports.default=series(copyHtml,task1,promiseTask,callbackTask,imgMinify,jsMinify/* ,cssMinify */)
-
 //sass task
 var sass = require('gulp-sass');
 function sassMinify() {
-    return src(["src/sass/**/*.scss", "src/css/**/*.css"])
+    return src(["src/sass/**/*.scss", "src/css/**/*.css"],{sourcemaps:true})
         .pipe(sass()) // Using gulp-sass
         //concate all js files in all.min.js
         .pipe(concat('style.sass.min.css'))
         .pipe(cleanCss())
-        .pipe(gulp.dest('dist/assets/css'))
+        .pipe(dest('dist/assets/css',{sourcemaps:'.'}))
 }
 
 
