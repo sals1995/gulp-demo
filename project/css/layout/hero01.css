@@ -1,0 +1,21 @@
+.hero01 {
+  display: flex;
+  width: 100%;
+  height: 88vh;
+  flex-direction: column;
+  /* color:   rgb(72, 164, 226); */
+  position: relative;
+  background-repeat: no-repeat;
+  background-size: cover;
+  text-align: center;
+  justify-content: center;
+  font-size: 3rem;
+  line-height: 1.2;
+}
+
+
+@media screen and (max-width: 768px) {
+  .hero01 {
+    height: 78vh;
+  }
+}

@@ -1,5 +1,6 @@
 # For projects using Nanoc (http://nanoc.ws/)
 
+node_modules
 # Default location for output (needs to match output_dir's value found in nanoc.yaml)
 output/
 
@@ -8,4 +9,3 @@ tmp/nanoc/
 
 # Crash Log
 crash.log
-node_modules

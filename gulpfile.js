@@ -4,7 +4,7 @@ const { src, dest, watch, parallel, series } = require("gulp")
 //minify images and copy it to dist folder
 const imagemin = require('gulp-imagemin');
 function imgMinify() {
-    return src('src/pics/*')
+    return gulp.src('project/pics/*')
         .pipe(imagemin())
         .pipe(gulp.dest('dist/images'));
 }
@@ -19,7 +19,7 @@ exports.img = imgMinify
 
 const htmlmin = require('gulp-htmlmin');
 function copyHtml() {
-    return src('src/*.html')
+    return src('project/*.html')
         .pipe(htmlmin({ collapseWhitespace: true, removeComments: true }))
         .pipe(gulp.dest('dist'))
 }
@@ -28,18 +28,14 @@ exports.html = copyHtml
 
 
 //minify js files and copy it to dist folder
-const sourcemaps = require('gulp-sourcemaps');
 const concat = require('gulp-concat');
 const terser = require('gulp-terser');
-const babel = require("gulp-babel")
+
 function jsMinify() {
-    return src('src/js/**/*.js',{sourcemaps:true}) //path includeing all js files in all folders
+    return src('project/js/**/*.js',{sourcemaps:true}) //path includeing all js files in all folders
     
         //concate all js files in all.min.js
         .pipe(concat('all.min.js'))
-        .pipe(
-            babel()
-          )
         //use terser to minify js files
         .pipe(terser())
         //create source map file in the same directory
@@ -52,7 +48,7 @@ exports.js = jsMinify
 
 var cleanCss = require('gulp-clean-css');
 function cssMinify() {
-    return src("src/css/**/*.css")
+    return src("project/css/**/*.css")
         //concate all css files in style.min.css
         .pipe(concat('style.min.css'))
         //minify file 
@@ -63,8 +59,8 @@ exports.css = cssMinify
 //sass task
 var sass = require('gulp-sass');
 function sassMinify() {
-    return src(["src/sass/**/*.scss", "src/css/**/*.css"],{sourcemaps:true})
-        .pipe(sass()) // Using gulp-sass
+    return src(["project/sass/**/*.scss", "project/css/**/*.css"],{sourcemaps:true})
+        .pipe(sass()) // Using gulp-sass to convert sass to css
         //concate all js files in all.min.js
         .pipe(concat('style.sass.min.css'))
         .pipe(cleanCss())
@@ -82,15 +78,17 @@ function serve (cb){
   });
   cb()
 }
-function reloadSync(cb){
- browserSync.reload()
-  cb()
+
+function reloadTask(done) {
+  browserSync.reload()
+  done()
 }
 
 //watch task
 function watchTask() {
-    watch('src/*.html',series(copyHtml, reloadSync))
-    watch(['src/js/**/*.js', "src/css/**/*.css","src/sass/**/*.scss"], { interval: 1000 },parallel(jsMinify,sassMinify,reloadSync));
+    watch('project/*.html',series(copyHtml, reloadTask))
+    watch('project/js/**/*.js',series(jsMinify, reloadTask))
+    watch(["project/css/**/*.css","project/sass/**/*.scss"], parallel(sassMinify,reloadTask));
 }
 exports.default = series(parallel(imgMinify, jsMinify/* , cssMinify */, sassMinify, copyHtml), serve,watchTask)
 
