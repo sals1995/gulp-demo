@@ -1,10 +1,10 @@
 .header {
-  background-color: rgb(72, 164, 226);
+  background-color: rgb(211, 74, 71);
   display: flex;
   justify-content: center;
   align-items: center;
   height: 70px;
-  color: aliceblue;
+  color: rgb(246, 248, 250);
   font-size: 20px;
   line-height: 1.4;
 }

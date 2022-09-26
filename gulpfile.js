@@ -1,11 +1,18 @@
 const gulp = require("gulp");
 const { src, dest, watch, parallel, series } = require("gulp")
 
+
+var globs={
+  html:"project/*.html",
+  css:"project/css/**/*.css",
+  img:'project/pics/*',
+  js:'project/js/**/*.js'
+}
 //minify images and copy it to dist folder
 const imagemin = require('gulp-imagemin');
 //don't forget to install gulp-imagemin with version 7.1.0
 function imgMinify() {
-    return gulp.src('project/pics/*')
+    return gulp.src(globs.img)
         .pipe(imagemin())
         .pipe(gulp.dest('dist/images'));
 }
@@ -20,7 +27,7 @@ exports.img = imgMinify
 
 const htmlmin = require('gulp-htmlmin');
 function minifyHTML() {
-    return src('project/*.html')
+    return src(globs.html)
         .pipe(htmlmin({ collapseWhitespace: true, removeComments: true }))
         .pipe(gulp.dest('dist'))
 }
@@ -33,7 +40,8 @@ const concat = require('gulp-concat');
 const terser = require('gulp-terser');
 
 function jsMinify() {
-    return src('project/js/**/*.js',{sourcemaps:true}) //path includeing all js files in all folders
+  //search for sourcemaps
+    return src(globs.js,{sourcemaps:true}) //path includeing all js files in all folders
     
         //concate all js files in all.min.js
         .pipe(concat('all.min.js'))
@@ -49,7 +57,7 @@ exports.js = jsMinify
 
 var cleanCss = require('gulp-clean-css');
 function cssMinify() {
-    return src("project/css/**/*.css")
+    return src(globs.css)
         //concate all css files in style.min.css
         .pipe(concat('style.min.css'))
         //minify file 
@@ -57,18 +65,6 @@ function cssMinify() {
         .pipe(dest('dist/assets/css'))
 }
 exports.css = cssMinify
-//sass task
-const sass = require('gulp-sass')(require('sass'));
-function sassMinify() {
-    return src(["project/sass/**/*.scss", "project/css/**/*.css"],{sourcemaps:true})
-        .pipe(sass()) // Using gulp-sass to convert sass to css
-        //concate all js files in all.min.js
-        .pipe(concat('style.sass.min.css'))
-        .pipe(cleanCss())
-        .pipe(dest('dist/assets/css',{sourcemaps:'.'}))
-}
-
-
 
 var browserSync = require('browser-sync');
 function serve (cb){
@@ -87,11 +83,12 @@ function reloadTask(done) {
 
 //watch task
 function watchTask() {
-    watch('project/*.html',series(minifyHTML, reloadTask))
-    watch('project/js/**/*.js',series(jsMinify, reloadTask))
-    watch(["project/css/**/*.css","project/sass/**/*.scss"], series(sassMinify,reloadTask));
+    watch(globs.html,series(minifyHTML, reloadTask))
+    watch(globs.js,series(jsMinify, reloadTask))
+    watch(globs.css, series(cssMinify,reloadTask));
+    watch(globs.img, series(imgMinify,reloadTask));
 }
-exports.default = series( parallel(imgMinify, jsMinify, sassMinify, minifyHTML), serve,watchTask)
+exports.default = series( parallel(imgMinify, jsMinify, cssMinify, minifyHTML), serve , watchTask)
 
 
 

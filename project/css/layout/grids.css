@@ -1,0 +1,36 @@
+.sections {
+    /* background-color: rgb(14, 59, 87); */
+    display: grid;
+    grid-template-columns: auto auto auto;
+    /* justify-content: center; */
+    align-items: center;
+    /* height: 70px; */
+    color: rgb(51, 53, 54);
+    font-size: 20px;
+    line-height: 4.4;
+  }
+  .sections div{
+    /* background-color: rgba(255, 255, 255, 0); */
+    /* border: 1px solid rgba(0, 0, 0, 0.8); */
+    padding: 50px;
+    font-size: 30px;
+    text-align: center;
+    height: 230px;
+    /* width: 20px; */
+    /* color: black; */
+  }
+  .sections div:nth-child(even){
+  background-color:  rgb(255, 255, 255);
+  }
+  .sections div:nth-child(odd){
+    background-color:   rgb(211, 74, 71);;
+    }
+   /*  .first{
+      color: rgb(224, 8, 8);
+      grid-row: 1 / 4;
+      height: 800px;
+      background-color: white;
+    } */
+    section h1{
+      margin-top: 100px;
+    }

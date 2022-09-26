@@ -12,3 +12,8 @@
 body {
   background-attachment: fixed;
 }
+
+body > img{
+  width: 70%;
+  margin:-500px 150px;
+}
