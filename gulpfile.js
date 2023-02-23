@@ -1,6 +1,6 @@
 const gulp = require("gulp");
 const { src, dest, watch, parallel, series } = require("gulp")
-
+const {resolver} = require('./helper');
 
 var globs={
   html:"project/*.html",
@@ -8,6 +8,7 @@ var globs={
   img:'project/pics/*',
   js:'project/js/**/*.js'
 }
+
 //minify images and copy it to dist folder
 const imagemin = require('gulp-imagemin');
 //don't forget to install gulp-imagemin with version 7.1.0
@@ -29,7 +30,10 @@ const htmlmin = require('gulp-htmlmin');
 function minifyHTML() {
     return src(globs.html)
         .pipe(htmlmin({ collapseWhitespace: true, removeComments: true }))
-        .pipe(gulp.dest('dist'))
+        .pipe(resolver(/((href)(\S+)\.css)('|")+/g, {prefix: "href", output: "assets/css", rename: false, filename: "style.min.css"}))
+        .pipe(resolver(/((src)(\S+)\.jpg)('|")+/g, {prefix: "src", output: "images"}))
+        .pipe(resolver(/((src)(\S+)\.js)('|")+/g, {prefix: "src", output: "assets/js", rename: true, filename:"all.min.js"}))
+    .pipe(gulp.dest('dist'))
 }
 
 exports.html = minifyHTML
@@ -40,9 +44,9 @@ const concat = require('gulp-concat');
 const terser = require('gulp-terser');
 
 function jsMinify() {
-  //search for sourcemaps
+    //search for sourcemaps
     return src(globs.js,{sourcemaps:true}) //path includeing all js files in all folders
-    
+
         //concate all js files in all.min.js
         .pipe(concat('all.min.js'))
         //use terser to minify js files
@@ -60,7 +64,7 @@ function cssMinify() {
     return src(globs.css)
         //concate all css files in style.min.css
         .pipe(concat('style.min.css'))
-        //minify file 
+        //minify file
         .pipe(cleanCss())
         .pipe(dest('dist/assets/css'))
 }
@@ -68,17 +72,17 @@ exports.css = cssMinify
 
 var browserSync = require('browser-sync');
 function serve (cb){
-  browserSync({
-    server: {
-      baseDir: 'dist/'
-    }
-  });
-  cb()
+    browserSync({
+        server: {
+            baseDir: 'dist/'
+        }
+    });
+    cb()
 }
 
 function reloadTask(done) {
-  browserSync.reload()
-  done()
+    browserSync.reload()
+    done()
 }
 
 //watch task
@@ -89,7 +93,3 @@ function watchTask() {
     watch(globs.img, series(imgMinify,reloadTask));
 }
 exports.default = series( parallel(imgMinify, jsMinify, cssMinify, minifyHTML), serve , watchTask)
-
-
-
-
