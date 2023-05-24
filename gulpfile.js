@@ -1,115 +1,95 @@
+const gulp = require("gulp");
+const { src, dest, watch, parallel, series } = require("gulp")
 
-const { src, dest, series , watch,parallel} = require('gulp');
 
-const globs={
-    html:"project/**/*.html",
-    css:"project/css/**/*.css",
-    js:"project/js/**/*.js",
-    img:"project/pics/*"
+var globs={
+  html:"project/*.html",
+  css:"project/css/**/*.css",
+  img:'project/pics/*',
+  js:'project/js/**/*.js'
+}
+//minify images and copy it to dist folder
+const imagemin = require('gulp-imagemin');
+//don't forget to install gulp-imagemin with version 7.1.0
+function imgMinify() {
+    return gulp.src(globs.img)
+        .pipe(imagemin())
+        .pipe(gulp.dest('dist/images'));
 }
 
+//run image task by 'gulp' commond
+//  exports.default = imgMinify
+//  or
+//run image task by 'gulp imgMinify' commond
+exports.img = imgMinify
 
-const htmlmin = require("gulp-html-minifier-terser");
-// html task
-function htmlTask() {
-    //read file
-   return src(globs.html)
-   //minfiy
-   .pipe(htmlmin({collapseWhitespace:true,removeComments:true}))
-    // move to dist
-    .pipe(dest("dist"))
+//creating dist folder and copy html files to it
+
+const htmlmin = require('gulp-htmlmin');
+function minifyHTML() {
+    return src(globs.html)
+        .pipe(htmlmin({ collapseWhitespace: true, removeComments: true }))
+        .pipe(gulp.dest('dist'))
 }
 
-exports.h= htmlTask
+exports.html = minifyHTML
 
 
-
-const concat =require("gulp-concat")
-const cleanCSS = require('gulp-clean-css');
-function cssTask() {
-    // read files
-   return src(globs.css)
-    // concat to one file
-    .pipe(concat("style.min.css"))
-    // minify
-    .pipe(cleanCSS())
-    // move to dist
-    .pipe(dest("dist/assets/css"))
-}
-
-
-exports.css =cssTask
-
-
+//minify js files and copy it to dist folder
+const concat = require('gulp-concat');
 const terser = require('gulp-terser');
-function jsTask() {
-    return src(globs.js,{sourcemaps:true})
-    .pipe(concat("script.min.js"))
-    .pipe(terser())
-    .pipe(dest("dist/assets/js" ,{sourcemaps:"."}))
-}
 
-
-exports.js =jsTask
-
-
-const optimizeImages =require("gulp-optimize-images");
-function imgTask() {
+function jsMinify() {
+  //search for sourcemaps
+    return src(globs.js,{sourcemaps:true}) //path includeing all js files in all folders
     
-    return src(globs.img)
-    .pipe(optimizeImages({compressOptions:{
-        jpeg: {
-            quality: 50,
-            progressive: true,
-        },
-        png: {
-            quality: 90,
-            progressive: true,
-            compressionLevel: 6,
-        },
-        webp: {
-            quality: 80,
-        },
-    }}))
-    .pipe(dest('dist/assets/images'))
+        //concate all js files in all.min.js
+        .pipe(concat('all.min.js'))
+        //use terser to minify js files
+        .pipe(terser())
+        //create source map file in the same directory
+        .pipe(dest('dist/assets/js',{sourcemaps:'.'}))
 }
-exports.img = imgTask
+exports.js = jsMinify
 
-// generate image sprite
-var spritesmith = require('gulp.spritesmith');
-function imgSprite() {
-    // this will generate a sprite folder in project with all-in-one.png and styleForSprite.css
-    return  src(globs.img)
-    .pipe(spritesmith({cssName:"styleForSprite.css",imgName:"all-in-one.png"}))
-    .pipe(dest("project/sprite"))
+
+//minify css files and copy it to dist folder
+
+var cleanCss = require('gulp-clean-css');
+function cssMinify() {
+    return src(globs.css)
+        //concate all css files in style.min.css
+        .pipe(concat('style.min.css'))
+        //minify file 
+        .pipe(cleanCss())
+        .pipe(dest('dist/assets/css'))
 }
+exports.css = cssMinify
 
-exports.sprite= imgSprite
-
-function watchTask(){
-    watch(globs.html,htmlTask)
-    watch(globs.css,cssTask)
-    watch(globs.js,jsTask)
-    watch(globs.img,imgTask)
+var browserSync = require('browser-sync');
+function serve (cb){
+  browserSync({
+    server: {
+      baseDir: 'dist/'
+    }
+  });
+  cb()
 }
 
-function dummyTask(done){
-    // logic
-    console.log("test !");
-    done()
+function reloadTask(done) {
+  browserSync.reload()
+  done()
 }
 
-//default //gulp
-exports.default= series( parallel(  htmlTask, cssTask ,jsTask, imgTask ),dummyTask,watchTask )
-
-/* 
-function task1() {
-    // code
-    return Promise.resolve()
+//watch task
+function watchTask() {
+    watch(globs.html,series(minifyHTML, reloadTask))
+    watch(globs.js,series(jsMinify, reloadTask))
+    watch(globs.css, series(cssMinify,reloadTask));
+    watch(globs.img, series(imgMinify,reloadTask));
 }
+exports.default = series( parallel(imgMinify, jsMinify, cssMinify, minifyHTML), serve , watchTask)
 
-//named export
-exports.t1 =task1 //gulp t1
 
-//defualt export
-exports.default=  task1 //gulp */
+
+
