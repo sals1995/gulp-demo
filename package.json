@@ -5,15 +5,13 @@
     "gulp": "^5.0.0",
     "gulp-clean-css": "^4.3.0",
     "gulp-concat": "^2.6.1",
-    "gulp-htmlmin": "^5.0.1",
-    "gulp-imagemin": "^9.1.0",
-    "gulp-terser": "^2.1.0",
-    "gulp.spritesmith": "^6.13.1"
+    "gulp-html-minifier-terser": "^7.1.0",
+    "gulp-optimize-images": "^1.1.5",
+    "gulp-terser": "^2.1.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC"
